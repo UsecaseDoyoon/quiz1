@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>퀴즈 만들기</title>
+
+    <style>
+
+#result-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.5); /* 반투명 배경 */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000; /* 다른 요소 위에 뜨게 */
+}
+
+.modal-content {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
+}
+
+#result-image {
+    width: 50vw; /* 이미지 크기 조정 */
+    max-height: 60vh;
+    border-radius: 10px;
+}
+
+#confirm-btn {
+    margin-top: 20px;
+    width: 20vw;
+    height: 10vh;
+    font-size: 5vh;
+    background-color: #470f0f;
+    color: white;
+    border-radius: 20px;
+    border: 4px solid #6b4c4c;
+}
+
+
+        body {
+            margin: 0;
+            overflow: hidden; /* 스크롤바 숨기기 */
+            font-family: Arial, sans-serif;
+            text-align: center;
+            height: 100vh; /* 전체 높이를 100vh로 설정 */
+            display: flex;
+            flex-direction: column;
+            justify-content: center; /* 중앙 정렬 */
+            background-image: url('aa.jpg'); /* 여기에 이미지 URL 입력 */
+            background-size: cover; /* 배경 이미지가 화면을 가득 채우도록 설정 */
+            background-position: center; /* 배경 이미지의 위치를 중앙으로 설정 */
+        }
+
+        .background {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 80%;
+            height: 100%;
+            background-image: url('bb.jpg'); /* 여기에 이미지 URL 입력 */
+            background-size: cover; /* 변경된 부분 */
+            background-position: center; /* 배경 이미지의 위치를 중앙으로 설정 */
+            background-repeat: no-repeat; /* 여백이 생길 경우 반복되지 않도록 설정 */
+            transform: translate(-50%, -50%); /* 중앙 정렬을 위해 이동 */
+            background-size: 100% ; /* 너비는 50%, 높이는 자동으로 비율 유지 */
+
+        }
+
+        /* 이미지 */
+        #quiz-image {
+            width: 40vw; /* 이미지 너비를 화면 비율에 맞게 조정 */
+            height: 45vh; /* 높이는 자동으로 조정 */
+            max-height: 60vh; /* 최대 높이 설정 */
+            margin: 20px 0; /* 이미지와 버튼 간격 */
+            border-radius: 10px; /* 모서리를 둥글게 설정 */
+            position: absolute;
+            right: 33vw;
+            top: 25vh;
+        }
+
+        #options {
+            display: flex;
+            flex-direction: column; /* 수직 정렬 */
+            align-items: flex-end; /* 오른쪽 정렬 */
+            position: absolute; /* 절대 위치 지정 */
+            right: 6vw; /* 오른쪽 여백 */
+            top: 31vh; /* 이미지 아래에 위치하도록 조정 */
+        }
+
+        /*버튼에 대한 css*/
+        button {
+            width: 25vw; /* 버튼 너비를 화면 비율에 맞게 조정 */
+            height: 12vh; /* 버튼 높이 */
+            font-size: 6vh; /* 글자 크기를 더 크게 조정 */
+            margin: 5px 0; /* 버튼 간격 */
+            border-radius: 20px; /* 모서리를 둥글게 설정 */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* 그림자 추가 */
+            background-color: white; /* 기본 배경 색상 */
+            transition: background-color 0.3s; /* 배경 색상 전환 효과 */
+        }
+
+        .active {
+            background-color: yellow; /* 클릭 시 노란색 배경 */
+            border: 4px solid #6b4c4c;
+
+        }
+
+        /*밑에뜨는박스요*/
+        #touch-message {
+            position: absolute;
+            bottom: 6vh; /* 화면 아래쪽에 위치 */
+            left: 38%;
+            transform: translateX(-50%);
+            display: flex;
+            align-items: center;
+            justify-content: center; /* 수평 중앙 정렬 추가 */
+
+            background-color: white;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* 그림자 추가 */
+            border-radius: 20px; /* 모서리를 둥글게 설정 */
+            width: 53vw;
+            height: 15vh;
+            text-align: center;
+            font-size: 6vh; /* 글자 크기를 더 크게 조정 */
+            border: 4px solid #6b4c4c;
+        }
+
+        #input-box {
+            margin-left: 10px; /* 빈칸과의 간격 */
+            padding: 5px;
+            border: 1px solid #ccc; /* 테두리 */
+            border-radius: 5px; /* 모서리 둥글게 */
+            width: 15vw; /* 빈칸 너비 */
+            font-size: 6vh; /* 글자 크기를 더 크게 조정 */
+            text-align: center;
+        }
+
+        /* 정답 선택 버튼 스타일 */
+        #submit-answer {
+            color: rgb(255, 252, 238);
+            font-weight :bolder ;
+            position: absolute;
+            bottom: 6.2vh; /* 화면 아래쪽에 위치 */
+            right: 7vw; /* 오른쪽 여백 */
+
+            width: 15vw; /* 버튼 너비 */
+            height: 15vh; /* 버튼 높이 */
+            font-size: 5vh; /* 글자 크기 */
+            border-radius: 30px; /* 모서리를 둥글게 설정 */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* 그림자 추가 */
+            background-color: rgb(71, 15, 15); /* 기본 배경 색상 */
+            border: 4px solid #6b4c4c; /* 흰색 테두리 추가 */
+            transition: background-color 0.3s; /* 배경 색상 전환 효과 */
+            
+        }
+
+        h1 {
+        position: relative; /* 상대 위치 지정 */
+        display: inline-block; /* 인라인 블록으로 설정하여 너비 조정 가능 */
+        margin-bottom: 20px; /* 아래쪽 여백 추가 */
+        top: 9vh;
+        font-size: 5.5vh;
+        width: 92%;
+
+        }
+
+        h1::after {
+        content: ''; /* 가상의 요소 생성 */
+        display: block; /* 블록 요소로 설정 */
+        width: 99%; /* 너비를 100%로 설정 */
+        height: 10px; /* 밑줄 두께 설정 */
+        background-color: yellow; /* 밑줄 색상 설정 */
+        position: absolute; /* 절대 위치 지정 */
+        left: 0; /* 왼쪽 정렬 */
+        bottom: -3vh; /* h1의 아래쪽으로 이동 */
+        }
+
+        #icon-container {
+            position: absolute; /* 절대 위치 지정으로 변경 */
+            bottom: -11vh; /* 화면 아래쪽에서의 위치 */
+            left: -28%; /* 왼쪽에서의 위치를 조정 (예: 1%에서 2%로 변경) */
+            width: 40vw; /* 아이콘 너비 */
+            height: 40vh; /* 아이콘 높이 */
+        }
+
+        #icon-container img {
+            width: 50%; /* div에 맞게 아이콘 크기 조정 */
+            height: 50%; /* div에 맞게 아이콘 크기 조정 */
+            object-fit: contain; /* 비율 유지 */
+        }
+
+
+            /* 말풍선 스타일 */
+            #speech-bubble {
+                font-size: 3vh;
+            position: absolute;
+            bottom: 100%; /* 말풍선 위치 조정 (아이콘 위쪽) */
+            left: 35%; /* 왼쪽에서의 위치 */
+            background-color: white; /* 배경 색상 */
+            border-radius: 10px; /* 모서리 둥글게 */
+            padding: 10px; /* 내부 여백 */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* 그림자 추가 */
+            width: 12vw; /* 말풍선 너비 */
+            text-align: center;
+
+        }
+
+        /*삼각뿔 만들기 핵힘드네..*/
+        #speech-bubble:after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border: 12px solid transparent;
+            border-top-color: #ffffff;
+            border-bottom: 0;
+            border-left: 0;
+            margin-left: -6px;
+            margin-bottom: -12px;
+        }
+        
+
+        #speech-bubble img {
+            width: 8vw; /* 작은 이미지 크기 */
+            height: 8vw; /* 작은 이미지 크기 */
+            object-fit: cover; /* 비율 유지 */
+            border-radius: 5px; /* 모서리 둥글게 */
+            margin-right: 10px; /* 이미지와 글씨 간격 */
+            padding-left: 2vw;
+
+        }
+
+        #speech-bubble #mike-icon {
+            display: block; /* 기본적으로 보이게 설정 */
+        }
+
+        #speech-bubble #mike-icon-alt {
+            display: none; /* 기본적으로 숨기기 */
+        }
+
+
+
+        #speech-bubble p {
+            font-size: 16px; /* 글씨 크기 */
+            margin: 0; /* 기본 여백 제거 */
+        }
+
+
+    </style>
+</head>
+
+<?php
+    $j = 1;
+    while ($row = pg_fetch_array($result))
+    {
+?>
+
+<body>
+    
+    <div class="background"> <!-- 배경 이미지 추가 -->
+
+        <h1> <?php echo $row['quiz1_name'] ?> 
+         Quiz 1.다음중 맞는 단어를 골라주세요.
+        </h1>
+        
+        <h2 id="question"></h2>
+        <!-- src="<?php echo $row['quiz1_picture'] ?>" -->
+        <img id="quiz-image" src="co2.jpeg"
+        alt="퀴즈 이미지"> <!-- 이미지 태그로 변경 -->
+        
+        <div id="options"> <!-- 버튼을 감싸는 div 추가 -->
+            <button onclick="checkAnswer(1, this)">    
+                <!-- <?php echo $row['quiz1_example1'] ?> -->
+                 Button
+            </button>
+
+            <button onclick="checkAnswer(2, this)">    
+            <!-- <?php echo $row['quiz1_example2'] ?> -->
+                Cookie
+            </button>
+
+            <button onclick="checkAnswer(3, this)">    
+                <!-- <?php echo $row['quiz1_example3'] ?> -->
+                 Picture
+            </button>
+        </div>
+        
+        <div id="touch-message">
+            I touch something
+            <input type="text" id="input-box" placeholder="???">
+        </div>
+
+        <button id="submit-answer" onclick="submitAnswer()">정답 선택</button> <!-- 정답 선택 버튼 추가 -->
+        
+        <div id="icon-container">
+            <img src="442.png" alt="아이콘 이미지" style="border: none; background: transparent;" > <!-- 아이콘 이미지 -->
+            <div id="speech-bubble">
+                <div style="position: relative;">
+                <img id="mike-icon" src="a12.png" alt="아이콘 이미지" onclick="playSong()" >
+                <img id="mike-icon-alt" src="442.png" alt="아이콘 이미지" style="display: none;" onclick="playSong()">
+                </div>
+            
+            </div>
+        </div>
+    
+    </div>
+
+    <div id="result-modal" style="display: none;">
+        <div class="modal-content">
+            <img id="result-image" src="" alt="결과 이미지">
+            <button id="confirm-btn" onclick="goToNextPage()">확인</button>
+        </div>
+    </div>
+    
+    <a id="nextLink" href="next.php" style="display: none;"></a>
+
+    <audio id="audio-player" src="<?php echo $row['quiz1_sound'] ?>" preload="auto"></audio> <!-- 오디오 태그 추가 -->
+
+    <script>
+        const correctAnswer = "Cookie";
+        // "<?php echo $row['quiz1_answer'] ?>"; 
+        // 정답 단어
+
+        const wrongAnswerUrl = "../quizeffect/again.php"; // 틀렸을 때 이동할 페이지
+        const correctAnswerUrl = "../quizeffect/next.php"; // 정답일 때 이동할 페이지
+
+      function checkAnswer(answer, button) {
+            // 모든 버튼의 'active' 클래스를 제거
+            const buttons = document.querySelectorAll('#options button');
+            buttons.forEach(btn => btn.classList.remove('active'));
+
+            // 클릭된 버튼에 'active' 클래스 추가
+            button.classList.add('active');
+
+            document.getElementById('input-box').value = button.innerText;
+        }
+
+        function submitAnswer() {
+        const selectedAnswer = document.getElementById('input-box').value.trim();
+        const modal = document.getElementById('result-modal');
+        const resultImage = document.getElementById('result-image');
+
+        if (selectedAnswer === correctAnswer) {
+            resultImage.src = "o11.jpg"; // 정답 이미지 경로
+            nextUrl = correctAnswerUrl; // 정답일 때 이동할 URL 저장
+        } else {
+            resultImage.src = "o122.png"; // 오답 이미지 경로
+            nextUrl = wrongAnswerUrl; // 오답일 때 이동할 URL 저장
+        }
+
+        modal.style.display = "flex"; // 모달 띄우기
+    }
+
+    function goToNextPage() {
+        document.location.href = nextUrl; // 확인 버튼 누르면 저장된 URL로 이동
+    }
+
+        function playSong() {
+            const audioPlayer = document.getElementById('audio-player');
+            const mikeIcon = document.getElementById('mike-icon');
+            const mikeIconAlt = document.getElementById('mike-icon-alt');
+
+            // 오디오가 재생 중인지 확인
+            if (audioPlayer.paused) {
+                audioPlayer.play(); // 음악 재생
+                mikeIcon.style.display = 'none'; // 원래 마이크 아이콘 숨기기
+                mikeIconAlt.style.display = 'block'; // 대체 아이콘 보이기
+            } else {
+                audioPlayer.pause(); // 음악 멈춤
+                // audioPlayer.currentTime = 0; // 음악을 처음으로 되돌림 (선택 사항)
+                mikeIcon.style.display = 'block'; // 원래 마이크 아이콘 보이기
+                mikeIconAlt.style.display = 'none'; // 대체 아이콘 숨기기
+            }
+        }
+
+    </script>
+
+</body>
+</html>
